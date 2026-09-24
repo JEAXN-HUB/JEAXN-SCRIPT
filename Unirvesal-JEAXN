@@ -1,0 +1,64 @@
+-- JEAXN HUB | UNIVERSAL SHOOTER | BLACKLINK 6H + ADMIN + MOD MENU
+local BLACKLINK_URL="https://blacklink.site/keyscript"
+local ADMIN_KEY="JEAXN-ADMIN"
+local EXPIRE=21600 -- 6 horas
+local KEY_FILE="JEAXN_UNI_KEY.json"
+
+local Http=game:GetService("HttpService")
+local Players=game:GetService("Players")
+local LP=Players.LocalPlayer
+local Camera=workspace.CurrentCamera
+local RunService=game:GetService("RunService")
+
+-- // SISTEMA DE KEYS 6H //
+local function saveKey(k)
+    local data={key=k,time=os.time()}
+    if writefile then
+        writefile(KEY_FILE,Http:JSONEncode(data))
+    else
+        getgenv().JEAXN_KEY_DATA=data
+    end
+end
+
+local function loadKey()
+    local ok,content=pcall(function()
+        if isfile and isfile(KEY_FILE) then
+            return readfile(KEY_FILE)
+        elseif getgenv().JEAXN_KEY_DATA then
+            return Http:JSONEncode(getgenv().JEAXN_KEY_DATA)
+        end
+    end)
+    if ok and content then
+        return Http:JSONDecode(content)
+    end
+    return nil
+end
+
+local function isExpired()
+    local d=loadKey()
+    if not d then return true end
+    if os.time()-d.time>=EXPIRE then
+        if delfile and isfile and isfile(KEY_FILE) then delfile(KEY_FILE) end
+        getgenv().JEAXN_KEY_DATA=nil
+        return true
+    end
+    return false
+end
+
+-- // FUNCION PRINCIPAL DEL HUB //
+local function startHub()
+    getgenv().JEAXN_Silent=false
+    getgenv().JEAXN_FOV=150
+    getgenv().JEAXN_TeamCheck=true
+    getgenv().JEAXN_ESP=false
+    getgenv().JEAXN_ESP_Objects={}
+
+    -- GUI PRINCIPAL MENU
+    local gui=Instance.new("ScreenGui",LP:WaitForChild("PlayerGui"))
+    gui.Name="JEAXN_UNIVERSAL_MENU"
+    gui.ResetOnSpawn=false
+
+    local main=Instance.new("Frame",gui)
+    main.Size=UDim2.new(0,280,0,380)
+    main.Position=UDim2.new(0.5,-140,0.5,-190)
+    main.BackgroundColor3=Color3.fromRGB(18,18
