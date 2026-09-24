@@ -1,0 +1,110 @@
+-- JEAXN HUB | 1v1 NORMAL + BLACKLINK 6H | FINAL
+local BLACKLINK_URL = "https://blacklink.site/keyscript"
+local ADMIN_KEY = "JEAXN-ADMIN"
+local KEY_FILE = "JEAXN_1v1_6H.json"
+local EXPIRE = 6*60*60
+local player = game.Players.LocalPlayer
+local Http = game:GetService("HttpService")
+
+local function saveKey(k)
+    local data = {key=k, time=os.time()}
+    if writefile then writefile(KEY_FILE, Http:JSONEncode(data)) else getgenv().JEAXN_SAVE = data end
+end
+local function loadKey()
+    local ok, cont = pcall(function()
+        if isfile and isfile(KEY_FILE) then return readfile(KEY_FILE)
+        elseif getgenv().JEAXN_SAVE then return Http:JSONEncode(getgenv().JEAXN_SAVE) end
+    end)
+    if ok and cont then return Http:JSONDecode(cont) end
+end
+local function expired()
+    local d = loadKey()
+    if not d then return true end
+    if os.time() - d.time >= EXPIRE then
+        if delfile and isfile(KEY_FILE) then delfile(KEY_FILE) end
+        getgenv().JEAXN_SAVE=nil
+        return true
+    end
+    return false, d
+end
+
+-- UI (tu misma UI)
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name="JEAXN_KEY_6H"
+gui.ResetOnSpawn=false
+local main = Instance.new("Frame", gui)
+main.Size=UDim2.new(0,320,0,230)
+main.Position=UDim2.new(0.5,-160,0.5,-115)
+main.BackgroundColor3=Color3.fromRGB(15,15,15)
+Instance.new("UICorner", main).CornerRadius=UDim.new(0,14)
+local title = Instance.new("TextLabel", main)
+title.Size=UDim2.new(1,-20,0,50)
+title.Position=UDim2.new(0,10,0,0)
+title.Text="JEAXN HUB | 1v1 [6H KEY]"
+title.TextColor3=Color3.new(1,1,1)
+title.BackgroundTransparency=1
+title.Font=Enum.Font.GothamBold
+title.TextSize=15
+local box = Instance.new("TextBox", main)
+box.Size=UDim2.new(0.9,0,0,42)
+box.Position=UDim2.new(0.05,0,0,70)
+box.PlaceholderText="Pon tu Key de blacklink.site"
+box.Text=""
+box.BackgroundColor3=Color3.fromRGB(25,25,25)
+box.TextColor3=Color3.new(1,1,1)
+Instance.new("UICorner", box).CornerRadius=UDim.new(0,10)
+local getBtn = Instance.new("TextButton", main)
+getBtn.Size=UDim2.new(0.42,0,0,42)
+getBtn.Position=UDim2.new(0.05,0,0,130)
+getBtn.Text="GET KEY"
+getBtn.BackgroundColor3=Color3.fromRGB(70,70,70)
+getBtn.TextColor3=Color3.new(1,1,1)
+Instance.new("UICorner", getBtn).CornerRadius=UDim.new(0,10)
+local valBtn = Instance.new("TextButton", main)
+valBtn.Size=UDim2.new(0.42,0,0,42)
+valBtn.Position=UDim2.new(0.53,0,0,130)
+valBtn.Text="VALIDAR"
+valBtn.BackgroundColor3=Color3.fromRGB(0,170,255)
+valBtn.TextColor3=Color3.new(1,1,1)
+Instance.new("UICorner", valBtn).CornerRadius=UDim.new(0,10)
+local status = Instance.new("TextLabel", main)
+status.Size=UDim2.new(1,0,0,30)
+status.Position=UDim2.new(0,0,0,190)
+status.Text="Ve anuncios 6H - blacklink.site"
+status.TextColor3=Color3.fromRGB(110,110,110)
+status.BackgroundTransparency=1
+status.TextSize=11
+
+local function loadHub()
+    gui:Destroy()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/imshrak/knifeduels/refs/heads/main/menu'))()
+end
+
+getBtn.MouseButton1Click:Connect(function()
+    setclipboard(BLACKLINK_URL)
+    status.Text="Link copiado! Completa anuncios"
+    status.TextColor3=Color3.fromRGB(80,255,120)
+    if syn and syn.request then syn.request({Url=BLACKLINK_URL, Method="GET"}) else setclipboard(BLACKLINK_URL) end
+end)
+
+local isExp, data = expired()
+if not isExp then
+    status.Text="Key activa! Cargando..."
+    status.TextColor3=Color3.fromRGB(80,255,120)
+    task.wait(1)
+    loadHub()
+else
+    valBtn.MouseButton1Click:Connect(function()
+        local k = box.Text:gsub("%s+","")
+        if k==ADMIN_KEY or #k>=5 then
+            saveKey(k)
+            status.Text="Key valida 6H! Cargando..."
+            status.TextColor3=Color3.fromRGB(80,255,120)
+            task.wait(0.5)
+            loadHub()
+        else
+            status.Text="Key invalida"
+            status.TextColor3=Color3.fromRGB(255,80,80)
+        end
+    end)
+end
